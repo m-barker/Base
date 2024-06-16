@@ -162,6 +162,7 @@ catkin_install_python(PROGRAMS
   nodes/txt_query_service
   scripts/test_index_service.py
   scripts/test_query_service.py
+  scripts/visualise_embeddings.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
