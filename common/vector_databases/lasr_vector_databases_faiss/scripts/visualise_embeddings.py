@@ -8,6 +8,7 @@ from lasr_vector_databases_faiss import (
     parse_txt_file,
     get_sentence_embeddings,
 )
+from tqdm import tqdm
 
 random.seed(42)
 
@@ -34,36 +35,39 @@ def main():
     model = load_model(args["model_name"])
     sentences = parse_txt_file(args["txt_path"])
     verb_dict = {
-        "take": ["take", "get", "grasp", "fetch"],
-        "place": ["put", "place"],
-        "deliver": ["bring", "give", "deliver"],
+        # "take": ["take", "get", "grasp", "fetch"],
+        # "place": ["put", "place"],
+        # "deliver": ["bring", "give", "deliver"],
         "bring": ["bring", "give"],
-        "go": ["go", "navigate"],
-        "find": ["find", "locate", "look for"],
-        "talk": ["tell", "say"],
+        # "go": ["go", "navigate"],
+        # "find": ["find", "locate", "look for"],
+        # "talk": ["tell", "say"],
         "answer": ["answer"],
-        "meet": ["meet"],
-        "tell": ["tell"],
-        "greet": ["greet", "salute", "say hello to", "introduce yourself to"],
-        "count": ["tell me how many"],
+        # "meet": ["meet"],
+        # "tell": ["tell"],
+        # "greet": ["greet", "salute", "say hello to", "introduce yourself to"],
+        # "count": ["tell me how many"],
         "follow": ["follow"],
-        "guide": ["guide", "escort", "take", "lead"],
+        # "guide": ["guide", "escort", "take", "lead"],
     }
 
     # shuffle sentences
     random.shuffle(sentences)
-
-    sentences = sentences[:50000]
+    sentences = sentences
     subset = []
     verbs = []
     for verb in verb_dict:
+        n_samples = 1000
         for syn in verb_dict[verb]:
-            for sentence in sentences:
+            for sentence in tqdm(sentences):
                 if sentence in subset:
                     continue
                 if syn in sentence:
+                    if n_samples == 0:
+                        break
                     subset.append(sentence)
                     verbs.append(verb)
+                    n_samples -= 1
 
     embeddings = get_sentence_embeddings(subset, model)
 
@@ -76,8 +80,18 @@ def main():
     fig, ax = plt.subplots()
     for verb in verb_dict:
         df_verb = df[df["verb"] == verb]
-        ax.scatter(df_verb["x"], df_verb["y"], label=verb)
+        ax.scatter(df_verb["x"], df_verb["y"], label=f"Command Verb: {verb}")
     ax.legend()
+    # Add title and axis names
+    plt.title("TSNE Plot of GPSR Command Sentence Embeddings", fontsize=16)
+    plt.xlabel("TSNE Component 1", fontsize=14)
+    plt.ylabel("TSNE Component 2", fontsize=14)
+
+    # Increase font size
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
+    plt.legend(fontsize=14)
+
     plt.show()
 
 
